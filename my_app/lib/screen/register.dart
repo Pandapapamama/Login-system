@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:my_app/model/profile.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:my_app/screen/home.dart';
@@ -75,19 +77,48 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
+                          //
                           //save data when press button
                           if (formkey.currentState!.validate()) {
                             //! คือเมื่อไม่ได้รับค่าให้แสดง validate
                             formkey.currentState
-                                ?.save(); //ให้แบบฟอร์มเรียก save ทุกตัวมใน formfield
-                            print(
-                              "email = ${profile.email} password = ${profile.password}",
-                            );
-                            formkey.currentState?.reset(); //clear formfield
+                                ?.save(); //ให้แบบฟอร์มเรียก save ทุกตัวใน formfield
+                            try {
+                              // โค้ดที่อาจจะเกิด error
+                              await FirebaseAuth
+                                  .instance //await จะรอผลลัพธ์จาก async ถึงจะทำงาน
+                                  .createUserWithEmailAndPassword(
+                                    email:
+                                        profile.email ??
+                                        "", // ??"" เพื่อกันค่า null ให้ส่งเป็น "" แทน
+                                    password: profile.password ?? "",
+                                  );
+                              Fluttertoast.showToast(
+                                msg: "Account already created",
+                                gravity: ToastGravity.TOP,
+                              );
+                              formkey.currentState?.reset(); //clear formfield
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return HomeScreen();
+                                  },
+                                ),
+                              );
+                            } on FirebaseAuthException catch (e) {
+                              // จัดการกับ error
+                              // print(e.message);
+                              // print(e.code);
+                              Fluttertoast.showToast(
+                                msg: e.message.toString(),
+                                gravity: ToastGravity.TOP,
+                              );
+                            }
                           }
                         },
-                        child: Text("Register"),
+                        child: Text("Sign in"),
                       ),
                     ),
                   ],
