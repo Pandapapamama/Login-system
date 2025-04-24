@@ -78,7 +78,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () async {
-                          //
                           //save data when press button
                           if (formkey.currentState!.validate()) {
                             //! คือเมื่อไม่ได้รับค่าให้แสดง validate
@@ -93,20 +92,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                         profile.email ??
                                         "", // ??"" เพื่อกันค่า null ให้ส่งเป็น "" แทน
                                     password: profile.password ?? "",
-                                  );
-                              Fluttertoast.showToast(
-                                msg: "Account already created",
-                                gravity: ToastGravity.TOP,
-                              );
-                              formkey.currentState?.reset(); //clear formfield
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) {
-                                    return HomeScreen();
-                                  },
-                                ),
-                              );
+                                  )
+                                  .then((value) {
+                                    formkey.currentState
+                                        ?.reset(); //clear formfield
+                                    Fluttertoast.showToast(
+                                      msg: "Account already created",
+                                      gravity: ToastGravity.TOP,
+                                    );
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) {
+                                          return HomeScreen();
+                                        },
+                                      ),
+                                    );
+                                  });
                             } on FirebaseAuthException catch (e) {
                               // จัดการกับ error
                               // print(e.message);
